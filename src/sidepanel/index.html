@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Context Analyzer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="top">
+      <h1>Context Analyzer</h1>
+      <p class="sub">
+        Análise passiva e heurística — não altera pedidos nem executa payloads.
+      </p>
+    </header>
+
+    <section class="panel score-row" aria-labelledby="score-title">
+      <h2 id="score-title" class="inline-h">Pontuação</h2>
+      <p id="score-display" class="score-display">—</p>
+      <button type="button" id="export-json" class="btn secondary small">
+        Exportar JSON
+      </button>
+    </section>
+
+    <section class="panel" aria-labelledby="findings-title">
+      <h2 id="findings-title">Achados</h2>
+      <div id="findings" class="findings"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="endpoints-title">
+      <h2 id="endpoints-title">Endpoints (DOM + rede)</h2>
+      <ul id="endpoints" class="endpoints"></ul>
+    </section>
+
+    <section class="panel" aria-labelledby="network-title">
+      <h2 id="network-title">Pedidos observados (replay manual)</h2>
+      <p class="hint">
+        Últimos XHR/fetch — copie fetch ou cURL para repetir o pedido manualmente (corpo não é
+        observado).
+      </p>
+      <div id="network-requests" class="network-requests"></div>
+    </section>
+
+    <section class="panel settings" aria-labelledby="settings-title">
+      <h2 id="settings-title">Definições</h2>
+      <label class="row">
+        <span>Detalhe das heurísticas</span>
+        <select id="heuristic-level" class="select-like">
+          <option value="normal">Normal</option>
+          <option value="compact">Compacto</option>
+        </select>
+      </label>
+      <label class="row">
+        <input type="checkbox" id="ai-enabled" />
+        <span>Ativar sugestões por IA (opcional)</span>
+      </label>
+      <label class="row block">
+        <span>Endpoint HTTPS (seu servidor)</span>
+        <input type="url" id="ai-url" placeholder="https://seu-servidor/sugestao" />
+      </label>
+      <button type="button" id="save-settings" class="btn">Guardar definições</button>
+      <button type="button" id="ai-suggest" class="btn secondary" disabled>
+        Pedir sugestão (IA)
+      </button>
+      <p id="ai-out" class="ai-out" aria-live="polite"></p>
+    </section>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
