@@ -100,6 +100,36 @@ body {
   word-break: break-word;
 }
 
+.finding-weakness {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 6px;
+  line-height: 1.35;
+}
+
+.xss-hints {
+  margin: 0;
+  padding-left: 18px;
+  max-height: 140px;
+  overflow: auto;
+}
+
+.xss-hints li {
+  margin-bottom: 6px;
+  word-break: break-all;
+}
+
+.xss-hints code {
+  font-size: 11px;
+  background: rgba(127, 127, 127, 0.12);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.hint.warn {
+  color: var(--warn);
+}
+
 .endpoints {
   margin: 0;
   padding-left: 18px;

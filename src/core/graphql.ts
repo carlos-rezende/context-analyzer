@@ -1,5 +1,6 @@
 import type { Finding, NetworkScanPayload } from "../shared/types";
 import { sanitizePlainText, sanitizeUrlForDisplay } from "../shared/sanitize";
+import { CWE, OWASP } from "../shared/weakness";
 
 const GRAPHQL_PATH = /\/graphql(\/|\?|$)/i;
 const APOLLO_URQL = /\b(apollo|urql|graphql-request|@apollo)\b/i;
@@ -29,6 +30,7 @@ export function graphqlFindingsFromNetwork(net: NetworkScanPayload): Finding[] {
         "Caminho ou query compatível com GraphQL. Valide introspecção e autorização.",
       severity: "low",
       evidence: safeUrl.slice(0, 200),
+      weaknessRefs: [{ cwe: CWE.GRAPHQL, owasp: OWASP.A01_2021 }],
     });
   }
 
@@ -40,6 +42,7 @@ export function graphqlFindingsFromNetwork(net: NetworkScanPayload): Finding[] {
       detail: "Resposta declarada como GraphQL.",
       severity: "info",
       evidence: sanitizePlainText(ct, 120),
+      weaknessRefs: [{ cwe: CWE.GRAPHQL, owasp: OWASP.A05_2021 }],
     });
   }
 
@@ -64,6 +67,7 @@ export function graphqlDomFindingsFromPage(
         detail: "URL de script menciona GraphQL.",
         severity: "info",
         evidence: sanitizeUrlForDisplay((el as HTMLScriptElement).src).slice(0, 200),
+        weaknessRefs: [{ cwe: CWE.GRAPHQL, owasp: OWASP.A05_2021 }],
       });
     }
   });
@@ -81,6 +85,7 @@ export function graphqlDomFindingsFromPage(
           detail:
             "Texto de script sugere Apollo/urql ou caminho /graphql. Confirme em rede.",
           severity: "info",
+          weaknessRefs: [{ cwe: CWE.GRAPHQL, owasp: OWASP.A05_2021 }],
         });
       }
     }
@@ -95,6 +100,7 @@ export function graphqlDomFindingsFromPage(
         title: "Página em caminho /graphql",
         detail: "A URL atual pode ser o endpoint ou UI GraphQL.",
         severity: "low",
+        weaknessRefs: [{ cwe: CWE.GRAPHQL, owasp: OWASP.A01_2021 }],
       });
     }
   } catch {

@@ -8,6 +8,7 @@ import {
 import type { DomScanPayload, Finding } from "../shared/types";
 import type { ExtensionMessage } from "../shared/messages";
 import { sanitizePlainText, sanitizeUrlForDisplay } from "../shared/sanitize";
+import { CWE, OWASP } from "../shared/weakness";
 
 const DEBOUNCE_MS = 400;
 
@@ -66,6 +67,7 @@ function extraDomFindings(
         "Foram listados campos cujo nome sugere identificadores. Teste controlo de acesso e previsibilidade.",
       severity: "low",
       evidence: `${numericParams.length} campo(s)`,
+      weaknessRefs: [{ cwe: CWE.IDOR, owasp: OWASP.A01_2021 }],
     });
   }
   try {
@@ -78,6 +80,7 @@ function extraDomFindings(
         detail:
           "Parâmetros na URL podem ser candidatos a manipulação (ex.: IDOR). Analise autorização.",
         severity: "info",
+        weaknessRefs: [{ cwe: CWE.IDOR, owasp: OWASP.A01_2021 }],
       });
     }
   } catch {

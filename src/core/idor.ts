@@ -1,5 +1,6 @@
 import type { Finding } from "../shared/types";
 import { sanitizePlainText } from "../shared/sanitize";
+import { CWE, OWASP } from "../shared/weakness";
 
 const NUMERIC_SEGMENT = /\/(\d{1,18})(?:\/|$|\?)/g;
 const ID_PARAM = /(?:^|[?&])(?:id|user_id|account_id|uid|order_id)=(\d+)/i;
@@ -36,6 +37,7 @@ export function idorFindingsFromHints(hints: string[], pageUrl: string): Finding
         "Foram encontrados segmentos ou parâmetros numéricos que podem indicar objetos endereçáveis por ID. Verifique autorização no servidor.",
       severity: "medium",
       evidence: `${hints.length} indício(s). Ex.: ${hints[0] ?? ""} — ${safe}`,
+      weaknessRefs: [{ cwe: CWE.IDOR, owasp: OWASP.A01_2021 }],
     },
   ];
 }

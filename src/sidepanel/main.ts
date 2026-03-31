@@ -1,13 +1,24 @@
 import type { AggregatedFindings, ExtensionSettings } from "../shared/types";
 import type { ExtensionMessage } from "../shared/messages";
+import {
+  buildBurpStyleEndpointsJson,
+  buildHarFromAggregated,
+  buildNucleiYamlSkeleton,
+  hostFromAggregated,
+  pathsFromAggregated,
+} from "../shared/export-tools";
 import { buildCurlLine, buildFetchSnippet } from "../shared/replay";
 import { sanitizePlainText } from "../shared/sanitize";
+import { XSS_MANUAL_HINTS } from "../shared/xss-hints";
 
 const findingsEl = document.getElementById("findings")!;
 const endpointsEl = document.getElementById("endpoints")!;
 const networkEl = document.getElementById("network-requests")!;
 const scoreDisplayEl = document.getElementById("score-display")!;
 const exportBtn = document.getElementById("export-json")!;
+const exportHarBtn = document.getElementById("export-har")!;
+const exportBurpBtn = document.getElementById("export-burp")!;
+const exportNucleiBtn = document.getElementById("export-nuclei")!;
 const aiEnabledEl = document.getElementById("ai-enabled") as HTMLInputElement;
 const aiUrlEl = document.getElementById("ai-url") as HTMLInputElement;
 const heuristicLevelEl = document.getElementById("heuristic-level") as HTMLSelectElement;
@@ -62,6 +73,15 @@ function renderFindings(agg: AggregatedFindings | null): void {
         <div class="finding-meta">${escapeHtml(f.category)} · ${escapeHtml(f.severity)}</div>
         <div class="finding-detail">${escapeHtml(detail)}</div>
       `;
+      if (f.weaknessRefs?.length) {
+        const wr = document.createElement("div");
+        wr.className = "finding-weakness";
+        wr.textContent = f.weaknessRefs
+          .map((r) => [r.cwe, r.owasp, r.note].filter(Boolean).join(" · "))
+          .filter(Boolean)
+          .join(" | ");
+        div.appendChild(wr);
+      }
       if (f.evidence) {
         const ev = document.createElement("div");
         ev.className = "finding-detail";
@@ -217,6 +237,15 @@ aiBtn.addEventListener("click", async () => {
   }
 });
 
+function downloadBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 exportBtn.addEventListener("click", () => {
   if (!lastAgg) {
     return;
@@ -224,13 +253,48 @@ exportBtn.addEventListener("click", () => {
   const blob = new Blob([JSON.stringify(lastAgg, null, 2)], {
     type: "application/json",
   });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `context-analyzer-findings-${lastAgg.tabId}-${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  downloadBlob(blob, `context-analyzer-findings-${lastAgg.tabId}-${Date.now()}.json`);
 });
+
+exportHarBtn.addEventListener("click", () => {
+  if (!lastAgg) return;
+  const har = buildHarFromAggregated(lastAgg);
+  const blob = new Blob([JSON.stringify(har, null, 2)], {
+    type: "application/json",
+  });
+  downloadBlob(blob, `context-analyzer-${lastAgg.tabId}-${Date.now()}.har`);
+});
+
+exportBurpBtn.addEventListener("click", () => {
+  if (!lastAgg) return;
+  const data = buildBurpStyleEndpointsJson(lastAgg);
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+  downloadBlob(blob, `context-analyzer-burp-${lastAgg.tabId}-${Date.now()}.json`);
+});
+
+exportNucleiBtn.addEventListener("click", () => {
+  if (!lastAgg) return;
+  const host = hostFromAggregated(lastAgg);
+  const paths = pathsFromAggregated(lastAgg);
+  const yaml = buildNucleiYamlSkeleton(host, paths);
+  const blob = new Blob([yaml], { type: "text/yaml;charset=utf-8" });
+  downloadBlob(blob, `context-analyzer-nuclei-${lastAgg.tabId}-${Date.now()}.yaml`);
+});
+
+function fillXssHintsList(): void {
+  const ul = document.getElementById("xss-hints");
+  if (!ul) return;
+  ul.innerHTML = "";
+  for (const h of XSS_MANUAL_HINTS) {
+    const li = document.createElement("li");
+    const code = document.createElement("code");
+    code.textContent = h;
+    li.appendChild(code);
+    ul.appendChild(li);
+  }
+}
 
 chrome.runtime.onMessage.addListener((msg: unknown) => {
   if (
@@ -244,5 +308,6 @@ chrome.runtime.onMessage.addListener((msg: unknown) => {
   }
 });
 
+fillXssHintsList();
 void loadSettingsUi();
 void refreshFindings();

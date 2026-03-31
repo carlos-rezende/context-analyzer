@@ -1,5 +1,6 @@
 import type { Finding } from "../shared/types";
 import { sanitizePlainText } from "../shared/sanitize";
+import { CWE, OWASP } from "../shared/weakness";
 
 const SUSPICIOUS_NAMES =
   /(password|passwd|token|secret|api[_-]?key|auth|bearer|csrf)/i;
@@ -49,6 +50,7 @@ export function analyzeInputsFromForms(root: Document): {
         "Existem campos cujos nomes sugerem segredos ou autenticação. Valide transporte, armazenamento e proteção CSRF.",
       severity: "low",
       evidence: `${suspiciousInputs.length} campo(s)`,
+      weaknessRefs: [{ cwe: CWE.INFO_LEAK, owasp: OWASP.A04_2021 }],
     });
   }
 

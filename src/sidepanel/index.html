@@ -20,6 +20,15 @@
       <button type="button" id="export-json" class="btn secondary small">
         Exportar JSON
       </button>
+      <button type="button" id="export-har" class="btn secondary small">
+        HAR
+      </button>
+      <button type="button" id="export-burp" class="btn secondary small">
+        Burp (JSON)
+      </button>
+      <button type="button" id="export-nuclei" class="btn secondary small">
+        Nuclei (YAML)
+      </button>
     </section>
 
     <section class="panel" aria-labelledby="findings-title">
@@ -39,6 +48,15 @@
         observado).
       </p>
       <div id="network-requests" class="network-requests"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="xss-title">
+      <h2 id="xss-title">Sugestões XSS (teste manual)</h2>
+      <p class="hint warn">
+        Apenas para alvos autorizados. A extensão <strong>não</strong> envia estes valores — copie e
+        cole manualmente onde fizer sentido no seu fluxo de teste.
+      </p>
+      <ul id="xss-hints" class="xss-hints"></ul>
     </section>
 
     <section class="panel settings" aria-labelledby="settings-title">
