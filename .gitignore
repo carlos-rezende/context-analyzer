@@ -1,6 +1,7 @@
 node_modules/
 package-lock.json
 dist/
+context-analyzer-v*.zip
 .cursor/
 *.log
 .DS_Store

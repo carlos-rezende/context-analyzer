@@ -1,6 +1,6 @@
 {
   "name": "context-analyzer",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "author": "Carlos Eli Rezende de Campos <carlospqdt_21@hotmail.com>",
   "license": "MIT",
   "private": true,
@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "optimize:icon": "node scripts/optimize-icon.mjs"
+    "optimize:icon": "node scripts/optimize-icon.mjs",
+    "pack": "pnpm run build && node scripts/pack-extension.mjs"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0",
