@@ -1,6 +1,8 @@
 {
   "name": "context-analyzer",
   "version": "0.6.0",
+  "author": "Carlos Eli Rezende de Campos <carlospqdt_21@hotmail.com>",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.4",

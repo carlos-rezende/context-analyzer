@@ -1,5 +1,7 @@
 /** Tipos compartilhados entre camadas (sem estado global). */
 
+import type { WeaknessRef } from "./weakness";
+
 export type Severity = "info" | "low" | "medium" | "high";
 
 export interface Finding {
@@ -9,6 +11,8 @@ export interface Finding {
   detail: string;
   severity: Severity;
   evidence?: string;
+  /** Classes de fraqueza conhecidas (CWE/OWASP); não implica CVE sem produto/versão. */
+  weaknessRefs?: WeaknessRef[];
 }
 
 export interface EndpointRef {

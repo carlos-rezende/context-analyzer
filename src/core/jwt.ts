@@ -1,5 +1,6 @@
 import type { Finding } from "../shared/types";
 import { sanitizePlainText } from "../shared/sanitize";
+import { CWE, OWASP } from "../shared/weakness";
 
 /** Heurística: três segmentos base64url, tamanhos mínimos (sem validar assinatura). */
 export function looksLikeJwt(value: string): boolean {
@@ -52,6 +53,7 @@ export function jwtFindingsFromStorage(
             "Foi detetado padrão JWT (3 segmentos). Verifique se não é exposto a XSS ou extensões.",
           severity: "medium",
           evidence: `chave: ${safeKey}, comprimento: ${val.length}`,
+          weaknessRefs: [{ cwe: CWE.JWT_EXPOSURE, owasp: OWASP.A02_2021 }],
         });
       }
     } catch {

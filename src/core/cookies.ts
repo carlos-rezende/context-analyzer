@@ -1,5 +1,6 @@
 import type { Finding } from "../shared/types";
 import { sanitizePlainText } from "../shared/sanitize";
+import { CWE, OWASP } from "../shared/weakness";
 
 export function analyzeSetCookieHeaders(setCookieLines: string[]): Finding[] {
   const findings: Finding[] = [];
@@ -22,6 +23,16 @@ export function analyzeSetCookieHeaders(setCookieLines: string[]): Finding[] {
     }
 
     if (issues.length > 0) {
+      const refs = [];
+      if (issues.some((x) => x.includes("Secure"))) {
+        refs.push({ cwe: CWE.COOKIE_INSECURE, owasp: OWASP.A02_2021 });
+      }
+      if (issues.some((x) => x.includes("HttpOnly"))) {
+        refs.push({ cwe: CWE.COOKIE_HTTPONLY, owasp: OWASP.A07_2021 });
+      }
+      if (issues.some((x) => x.includes("SameSite"))) {
+        refs.push({ cwe: CWE.SESSION_FIXATION, owasp: OWASP.A07_2021 });
+      }
       findings.push({
         id: `cookie-${cookieName}-${issues.join("-")}`.replace(/\s+/g, "-").slice(0, 80),
         category: "Cookies",
@@ -31,6 +42,7 @@ export function analyzeSetCookieHeaders(setCookieLines: string[]): Finding[] {
           ? "medium"
           : "low",
         evidence: sanitizePlainText(line, 400),
+        weaknessRefs: refs.length > 0 ? refs : [{ cwe: CWE.CONFIG, owasp: OWASP.A05_2021 }],
       });
     }
   }

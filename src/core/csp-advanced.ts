@@ -1,5 +1,6 @@
 import type { Finding } from "../shared/types";
 import { sanitizePlainText } from "../shared/sanitize";
+import { CWE, OWASP } from "../shared/weakness";
 
 /** Divide diretivas CSP (sem tratar vírgulas dentro de nonces/hashes de forma perfeita). */
 export function parseCspDirectives(
@@ -36,6 +37,7 @@ export function analyzeCspAdvanced(cspRaw: string): Finding[] {
       detail:
         "Política pode herdar comportamento permissivo. Revise default-src e script-src.",
       severity: "low",
+      weaknessRefs: [{ cwe: CWE.XSS, owasp: OWASP.A05_2021 }],
     });
   }
 
@@ -51,6 +53,7 @@ export function analyzeCspAdvanced(cspRaw: string): Finding[] {
         "Origens amplas (*) ou esquemas soltos enfraquecem a CSP.",
       severity: "medium",
       evidence: sanitizePlainText(scriptCombined.join(" "), 200),
+      weaknessRefs: [{ cwe: CWE.XSS, owasp: OWASP.A03_2021 }],
     });
   }
 
@@ -63,6 +66,7 @@ export function analyzeCspAdvanced(cspRaw: string): Finding[] {
         "Scripts ou estilos inline podem contornar parte da mitigação de XSS.",
       severity: "medium",
       evidence: csp.slice(0, 240),
+      weaknessRefs: [{ cwe: CWE.XSS, owasp: OWASP.A03_2021 }],
     });
   }
   if (/\bunsafe-eval\b/i.test(csp)) {
@@ -73,6 +77,7 @@ export function analyzeCspAdvanced(cspRaw: string): Finding[] {
       detail: "eval() e similares permanecem permitidos.",
       severity: "high",
       evidence: csp.slice(0, 240),
+      weaknessRefs: [{ cwe: CWE.XSS, owasp: OWASP.A03_2021 }],
     });
   }
 
@@ -85,6 +90,7 @@ export function analyzeCspAdvanced(cspRaw: string): Finding[] {
       detail:
         "Plugins/embeds podem herdar default-src. Considere object-src 'none'.",
       severity: "low",
+      weaknessRefs: [{ cwe: CWE.MIME_CONFUSION, owasp: OWASP.A05_2021 }],
     });
   }
 
@@ -97,6 +103,7 @@ export function analyzeCspAdvanced(cspRaw: string): Finding[] {
       detail:
         "A base URL de documentos pode ser influenciada por <base>. Avalie base-uri 'self'.",
       severity: "low",
+      weaknessRefs: [{ cwe: CWE.CONFIG, owasp: OWASP.A05_2021 }],
     });
   }
 
@@ -109,6 +116,7 @@ export function analyzeCspAdvanced(cspRaw: string): Finding[] {
       detail:
         "Qualquer origem pode incorporar a página em iframe (dependendo do restante da política).",
       severity: "medium",
+      weaknessRefs: [{ cwe: CWE.CLICKJACK, owasp: OWASP.A05_2021 }],
     });
   }
 
@@ -119,6 +127,12 @@ export function analyzeCspAdvanced(cspRaw: string): Finding[] {
       title: "upgrade-insecure-requests ativo",
       detail: "Pedidos HTTP são promovidos para HTTPS quando possível.",
       severity: "info",
+      weaknessRefs: [
+        {
+          note:
+            "Mitigação positiva (não é vulnerabilidade); reduz risco associado a CWE-319.",
+        },
+      ],
     });
   }
 

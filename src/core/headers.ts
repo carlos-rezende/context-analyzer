@@ -1,5 +1,6 @@
 import type { Finding } from "../shared/types";
 import { sanitizePlainText } from "../shared/sanitize";
+import { CWE, OWASP } from "../shared/weakness";
 import { analyzeCspAdvanced } from "./csp-advanced";
 
 function lowerKeys(h: Record<string, string>): Record<string, string> {
@@ -24,6 +25,10 @@ export function analyzeSecurityHeaders(
       detail:
         "Não foi observado cabeçalho Content-Security-Policy na resposta analisada. Considere política restritiva para reduzir XSS.",
       severity: "medium",
+      weaknessRefs: [
+        { cwe: CWE.XSS, owasp: OWASP.A03_2021 },
+        { cwe: CWE.MIME_CONFUSION, owasp: OWASP.A05_2021 },
+      ],
     });
   }
 
@@ -35,6 +40,7 @@ export function analyzeSecurityHeaders(
       detail:
         "Sem X-Frame-Options nem CSP com frame-ancestors, o framing pode ser mais permissivo (dependendo do restante da política).",
       severity: "low",
+      weaknessRefs: [{ cwe: CWE.CLICKJACK, owasp: OWASP.A05_2021 }],
     });
   }
 
@@ -46,6 +52,7 @@ export function analyzeSecurityHeaders(
       detail:
         "Strict-Transport-Security não observado nesta resposta. Avalie HSTS em HTTPS.",
       severity: "low",
+      weaknessRefs: [{ cwe: CWE.MITM_DOWNGRADE, owasp: OWASP.A02_2021 }],
     });
   }
 
@@ -56,6 +63,7 @@ export function analyzeSecurityHeaders(
       title: "X-Content-Type-Options ausente",
       detail: "MIME sniffing pode ser mais permissivo sem nosniff.",
       severity: "low",
+      weaknessRefs: [{ cwe: CWE.MIME_CONFUSION, owasp: OWASP.A05_2021 }],
     });
   }
 
@@ -66,6 +74,7 @@ export function analyzeSecurityHeaders(
       title: "Referrer-Policy ausente",
       detail: "Defina uma política explícita de referrer conforme necessidade.",
       severity: "info",
+      weaknessRefs: [{ cwe: CWE.INFO_LEAK, owasp: OWASP.A04_2021 }],
     });
   }
 
