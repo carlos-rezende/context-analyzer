@@ -15,8 +15,8 @@ O formato segue o espírito de [Keep a Changelog](https://keepachangelog.com/pt-
 - Pontuação de severidade (0–100), export JSON dos achados, badge no ícone por separador.
 - Pedidos XHR observados com cópia **fetch** / **cURL** para replay manual.
 - Painel lateral, IA opcional (endpoint HTTPS configurável), nível de detalhe compacto/normal.
-- Ícones de extensão (placeholders), build com Vite + `@crxjs/vite-plugin`.
-- Gestão de dependências com **pnpm** (`pnpm-lock.yaml`); documentação sem `npm`.
+- Ícone da extensão em `public/icons/context-analyzer.png`; build com Vite + `@crxjs/vite-plugin`.
+- Dependências com **pnpm** (`pnpm-lock.yaml`).
 
 ### Notas
 

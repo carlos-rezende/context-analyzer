@@ -9,12 +9,14 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "optimize:icon": "node scripts/optimize-icon.mjs"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0",
     "@types/chrome": "^0.0.268",
     "happy-dom": "^15.11.7",
+    "sharp": "^0.34.5",
     "typescript": "^5.6.3",
     "vite": "^5.4.11",
     "vitest": "^2.1.4"

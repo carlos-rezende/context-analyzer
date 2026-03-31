@@ -4,10 +4,10 @@
   "version": "0.6.0",
   "description": "Análise passiva de contexto e heurísticas de segurança em páginas web (MV3).",
   "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons/context-analyzer.png",
+    "32": "icons/context-analyzer.png",
+    "48": "icons/context-analyzer.png",
+    "128": "icons/context-analyzer.png"
   },
   "permissions": [
     "storage",
@@ -36,10 +36,10 @@
   "action": {
     "default_title": "Abrir Context Analyzer",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "icons/context-analyzer.png",
+      "32": "icons/context-analyzer.png",
+      "48": "icons/context-analyzer.png",
+      "128": "icons/context-analyzer.png"
     }
   }
 }

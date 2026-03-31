@@ -139,18 +139,18 @@ chrome.webRequest.onCompleted.addListener(
       void (async () => {
         const net = toNetworkPayload(details);
         const cur = await readAggregated(details.tabId);
-        const baseFindings = cur?.findings ?? [];
-        const merged = mergeNetworkIntoFindings(baseFindings, net);
+        /** Novo documento: só achados desta resposta principal; o DOM será reposto pelo content script. */
+        const merged = mergeNetworkIntoFindings([], net);
         const headerNames = Object.keys(net.responseHeaders);
-        const observedHeaderNames = [
-          ...new Set([...(cur?.observedHeaderNames ?? []), ...headerNames]),
-        ].slice(0, 120);
+        const observedHeaderNames = [...new Set(headerNames)].slice(0, 120);
         const baseAgg: AggregatedFindings = cur
           ? {
               ...cur,
               pageUrl: details.url,
               updatedAt: Date.now(),
               findings: dedupeFindings(merged),
+              endpoints: [],
+              dom: undefined,
               observedHeaderNames,
             }
           : {
@@ -350,7 +350,8 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
           findings: [],
           endpoints: [],
         } satisfies AggregatedFindings);
-      const next = enrichForUi(payload);
+      const synced = syncPageUrlWithTab(payload, tab.url ?? undefined);
+      const next = enrichForUi(synced);
       await broadcastFindings(next);
       await updateBadge(activeInfo.tabId, next);
     } catch {
@@ -358,6 +359,56 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
     }
   })();
 });
+
+/** Navegação no mesmo separador não dispara onActivated; sincroniza URL e reemite para o painel. */
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status !== "complete" || !tab?.url) return;
+  const pageUrl = tab.url;
+  if (
+    pageUrl.startsWith("chrome://") ||
+    pageUrl.startsWith("edge://") ||
+    pageUrl.startsWith("about:")
+  ) {
+    return;
+  }
+  void (async () => {
+    const active = await getActiveTabId();
+    if (active !== tabId) return;
+    const agg = await readAggregated(tabId);
+    if (!agg) {
+      const empty: AggregatedFindings = {
+        tabId,
+        pageUrl,
+        updatedAt: Date.now(),
+        findings: [],
+        endpoints: [],
+      };
+      const next = enrichForUi(empty);
+      await broadcastFindings(next);
+      await updateBadge(tabId, next);
+      return;
+    }
+    const synced = syncPageUrlWithTab(agg, pageUrl);
+    if (synced.pageUrl !== agg.pageUrl) {
+      const scored = { ...synced, severityScore: computeSeverityScore(synced.findings) };
+      await writeAggregated({
+        ...scored,
+        observedRequests: undefined,
+      });
+    }
+    const next = enrichForUi(synced);
+    await broadcastFindings(next);
+    await updateBadge(tabId, next);
+  })();
+});
+
+function syncPageUrlWithTab(
+  agg: AggregatedFindings,
+  tabUrl: string | undefined,
+): AggregatedFindings {
+  if (!tabUrl || agg.pageUrl === tabUrl) return agg;
+  return { ...agg, pageUrl: tabUrl, updatedAt: Date.now() };
+}
 
 async function broadcastFindings(agg: AggregatedFindings): Promise<void> {
   const out = enrichForUi(agg);
