@@ -1,6 +1,6 @@
 # Context Analyzer
 
-[![Version](https://img.shields.io/badge/version-0.6.1-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.6.2-blue)](CHANGELOG.md)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-green)](https://developer.chrome.com/docs/extensions/mv3/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
 [![Build](https://img.shields.io/badge/build-Vite-purple)](https://vitejs.dev/)
@@ -10,7 +10,7 @@
 [![Chrome](https://img.shields.io/badge/Chrome-supported-brightgreen)](https://www.google.com/chrome/)
 [![Edge](https://img.shields.io/badge/Edge-supported-brightgreen)](https://www.microsoft.com/edge)
 
-**Versão atual: 0.6.1** — ver [CHANGELOG.md](CHANGELOG.md).
+**Versão atual: 0.6.2** — ver [CHANGELOG.md](CHANGELOG.md).
 
 Extensão Chrome/Edge para **análise passiva** de contexto e heurísticas de segurança: DOM, endpoints, cabeçalhos de resposta (somente leitura) e cookies `Set-Cookie` observados.
 

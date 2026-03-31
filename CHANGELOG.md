@@ -4,6 +4,12 @@ Todas as alterações notáveis deste projeto serão documentadas aqui.
 
 O formato segue o espírito de [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.6.2] — 2026-03-31
+
+### Corrigido
+
+- `manifest.json` — campo `description` com no máximo 132 caracteres (requisito Edge Add-ons / Chrome Web Store).
+
 ## [0.6.1] — 2026-03-31
 
 ### Adicionado

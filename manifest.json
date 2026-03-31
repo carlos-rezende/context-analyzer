@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Context Analyzer",
-  "version": "0.6.1",
-  "description": "Análise passiva de segurança (Manifest V3). Non-intrusive — sem pedidos automatizados. Dados não saem do browser exceto se configurar IA opcional.",
+  "version": "0.6.2",
+  "description": "Análise passiva MV3. Sem pedidos automáticos. Dados locais; IA opcional.",
   "icons": {
     "16": "icons/context-analyzer.png",
     "32": "icons/context-analyzer.png",
