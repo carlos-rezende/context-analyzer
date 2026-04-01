@@ -9,7 +9,7 @@ import {
 } from "../shared/export-tools";
 import { buildCurlLine, buildFetchSnippet } from "../shared/replay";
 import { sanitizePlainText } from "../shared/sanitize";
-import { XSS_MANUAL_HINTS } from "../shared/xss-hints";
+import { mergeXssHints } from "../shared/xss-hints";
 
 const findingsEl = document.getElementById("findings")!;
 const endpointsEl = document.getElementById("endpoints")!;
@@ -28,6 +28,55 @@ const aiOut = document.getElementById("ai-out")!;
 
 let lastAgg: AggregatedFindings | null = null;
 let settingsCache: ExtensionSettings | null = null;
+
+const COPY_FEEDBACK_MS = 1800;
+const COPY_OK_LABEL = "Copiado!";
+
+const copyButtonTimers = new WeakMap<HTMLButtonElement, ReturnType<typeof setTimeout>>();
+
+/** Copia para a área de transferência e dá feedback visual no botão (todos os “Copiar …”). */
+function copyWithFeedback(button: HTMLButtonElement, text: string): void {
+  const prevText = button.textContent ?? "";
+  const hadSecondary = button.classList.contains("secondary");
+  const pending = copyButtonTimers.get(button);
+  if (pending !== undefined) clearTimeout(pending);
+
+  void navigator.clipboard.writeText(text).then(
+    () => {
+      button.classList.remove("btn-copy-error");
+      button.classList.add("btn-copied");
+      button.textContent = COPY_OK_LABEL;
+      const tid = setTimeout(() => {
+        button.classList.remove("btn-copied");
+        button.textContent = prevText;
+        if (hadSecondary) button.classList.add("secondary");
+        copyButtonTimers.delete(button);
+      }, COPY_FEEDBACK_MS);
+      copyButtonTimers.set(button, tid);
+    },
+    () => {
+      button.classList.remove("btn-copied");
+      button.classList.add("btn-copy-error");
+      button.textContent = "Falhou";
+      const tid = setTimeout(() => {
+        button.classList.remove("btn-copy-error");
+        button.textContent = prevText;
+        if (hadSecondary) button.classList.add("secondary");
+        copyButtonTimers.delete(button);
+      }, COPY_FEEDBACK_MS);
+      copyButtonTimers.set(button, tid);
+    },
+  );
+}
+
+/** Pré-visualização da URL longa (meio truncado); hover mostra a URL completa. */
+function truncateMiddle(s: string, max: number): string {
+  if (s.length <= max) return s;
+  const inner = max - 3;
+  const head = Math.max(8, Math.floor(inner * 0.55));
+  const tail = inner - head;
+  return `${s.slice(0, head)}…${s.slice(-tail)}`;
+}
 
 function isCompact(): boolean {
   return settingsCache?.heuristicDetailLevel === "compact";
@@ -54,6 +103,7 @@ function renderFindings(agg: AggregatedFindings | null): void {
     endpointsEl.appendChild(li);
     networkEl.innerHTML =
       '<p class="empty">Carregue uma página para ver pedidos de rede.</p>';
+    renderXssHints(null);
     return;
   }
 
@@ -132,14 +182,14 @@ function renderFindings(agg: AggregatedFindings | null): void {
       b1.className = "btn tiny";
       b1.textContent = "Copiar fetch";
       b1.addEventListener("click", () => {
-        void navigator.clipboard.writeText(buildFetchSnippet(r));
+        copyWithFeedback(b1, buildFetchSnippet(r));
       });
       const b2 = document.createElement("button");
       b2.type = "button";
       b2.className = "btn tiny secondary";
       b2.textContent = "Copiar cURL";
       b2.addEventListener("click", () => {
-        void navigator.clipboard.writeText(buildCurlLine(r));
+        copyWithFeedback(b2, buildCurlLine(r));
       });
       actions.append(b1, b2);
       row.append(meta, urlLine, actions);
@@ -148,6 +198,57 @@ function renderFindings(agg: AggregatedFindings | null): void {
   }
 
   updateAiButtonState();
+  renderXssHints(agg);
+}
+
+function renderXssHints(agg: AggregatedFindings | null): void {
+  const ul = document.getElementById("xss-hints");
+  if (!ul) return;
+  ul.innerHTML = "";
+  const pageUrl = agg?.pageUrl ?? "";
+  const dom = agg?.dom;
+  const items = mergeXssHints(pageUrl, dom);
+  for (const item of items) {
+    const li = document.createElement("li");
+    const ctx = document.createElement("div");
+    ctx.className = "xss-context";
+    ctx.textContent = item.context;
+    const code = document.createElement("code");
+    code.textContent = item.payload;
+    li.appendChild(ctx);
+    li.appendChild(code);
+    if (item.copyUrl) {
+      const preview = document.createElement("div");
+      preview.className = "xss-url-preview";
+      preview.textContent = truncateMiddle(item.copyUrl, 220);
+      preview.title = item.copyUrl;
+      li.appendChild(preview);
+    }
+    const actions = document.createElement("div");
+    actions.className = "xss-actions";
+    const bPayload = document.createElement("button");
+    bPayload.type = "button";
+    bPayload.className = "btn tiny secondary";
+    bPayload.textContent = "Copiar payload";
+    bPayload.addEventListener("click", () => {
+      copyWithFeedback(bPayload, item.payload);
+    });
+    actions.appendChild(bPayload);
+    if (item.copyUrl) {
+      const bUrl = document.createElement("button");
+      bUrl.type = "button";
+      bUrl.className = "btn tiny";
+      bUrl.textContent = "Copiar URL de teste";
+      bUrl.title =
+        "URL completa com o payload neste parâmetro (não envia pedido; cole na barra de endereço).";
+      bUrl.addEventListener("click", () => {
+        copyWithFeedback(bUrl, item.copyUrl!);
+      });
+      actions.appendChild(bUrl);
+    }
+    li.appendChild(actions);
+    ul.appendChild(li);
+  }
 }
 
 function escapeHtml(s: string): string {
@@ -283,19 +384,6 @@ exportNucleiBtn.addEventListener("click", () => {
   downloadBlob(blob, `context-analyzer-nuclei-${lastAgg.tabId}-${Date.now()}.yaml`);
 });
 
-function fillXssHintsList(): void {
-  const ul = document.getElementById("xss-hints");
-  if (!ul) return;
-  ul.innerHTML = "";
-  for (const h of XSS_MANUAL_HINTS) {
-    const li = document.createElement("li");
-    const code = document.createElement("code");
-    code.textContent = h;
-    li.appendChild(code);
-    ul.appendChild(li);
-  }
-}
-
 chrome.runtime.onMessage.addListener((msg: unknown) => {
   if (
     msg &&
@@ -308,6 +396,6 @@ chrome.runtime.onMessage.addListener((msg: unknown) => {
   }
 });
 
-fillXssHintsList();
+renderXssHints(null);
 void loadSettingsUi();
 void refreshFindings();
